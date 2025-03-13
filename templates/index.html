@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metadata Query Interface</title>
+    <style>
+        /* Base styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #101010;
+            color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #202020;
+            padding: 10px;
+            width: 100%;
+        }
+
+        header .logo-container {
+            position: absolute;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        header img {
+            height: 150px; /* Increased size */
+            margin-right: 20px;
+        }
+
+        header h2 {
+            margin: 0;
+            color: #1f7e0d; /* Xbox green */
+            cursor: pointer;
+        }
+
+        /* Main layout */
+        .main {
+            display: flex;
+            flex-grow: 1;
+            height: 100%;
+        }
+
+        /* Navigation styling */
+        nav {
+            background-color: #202020;
+            width: 200px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding-top: 10px;
+            flex-shrink: 0;
+        }
+
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+
+        nav ul li {
+            position: relative;
+            width: 100%;
+        }
+
+        nav ul li a {
+            display: block;
+            color: white;
+            padding: 14px 20px;
+            text-decoration: none;
+            width: 100%;
+        }
+
+        nav ul li a:hover {
+            background-color: #148511;
+        }
+
+        nav ul li ul {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 100%;
+            background-color: #333;
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            z-index: 1000;
+            width: 200px;
+        }
+
+        nav ul li:hover > ul {
+            display: block;
+        }
+
+        nav ul li ul li ul {
+            display: none;
+            left: 100%;
+        }
+
+        nav ul li ul li:hover > ul {
+            display: block;
+        }
+
+        nav ul li ul li a {
+            padding: 10px;
+            display: block;
+            color: white;
+        }
+
+        nav ul li ul li a:hover {
+            background-color: #444;
+        }
+
+        /* Content styling */
+        #content {
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        /* Form styling */
+        form {
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #202020;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        /* Login form specific styling */
+        #loginForm {
+            width: 300px;
+        }
+
+        label {
+            margin-top: 20px;
+            color: #ccc;
+        }
+
+        input, select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-top: 5px;
+            border: none;
+            border-radius: 4px;
+            background-color: #333;
+            color: #fff;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #1f7e0d;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #148511;
+        }
+
+        /* Table styling */
+        table {
+            width: 100%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #282828;
+        }
+
+        th, td {
+            border: 1px solid #444;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #1f7e0d;
+        }
+
+        tr:nth-child(even) {
+            background-color: #303030;
+        }
+
+        /* Results div */
+        #results {
+            width: 90%;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #202020;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            color: #ccc;
+        }
+
+        /* Filters form specific styling */
+        .filters-form {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .filters-form label {
+            margin: 0 10px;
+        }
+
+        .filters-form select, .filters-form input {
+            margin: 0 10px;
+        }
+
+        .filters-form button {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-container" onclick="loadHome()">
+            <img src="{{ url_for('static', filename='images/xbox-logo.png') }}" alt="Xbox Logo">
+        </div>
+        <h2 onclick="loadHome()">Welcome to CSO Data Analytics and Planning - OPEX</h2>
+    </header>
+    <div class="main">
+        <nav>
+            <ul>
+                <li><a href="#" onclick="loadHome()">Home</a></li>
+                <li><a href="#" onclick="loadProductCatalog()">Product Catalog</a></li>
+                <li><a href="#" onclick="loadReporting()">Reporting and Analytics</a></li>
+                <li><a href="#">Metadata Store</a>
+                    <ul>
+                        <li><a href="#">Xbox Games</a>
+                            <ul>
+                                <li><a href="#" onclick="loadView()">View Games</a></li>
+                                <li><a href="#" onclick="loadAddUpdate()">Add/Update Game Data</a></li>
+                                <li><a href="#" onclick="loadDelete()">Delete Game Data</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#">RawG</a>
+                            <ul>
+                                <li><a href="#" onclick="loadView()">View Games</a></li>
+                                <li><a href="#" onclick="loadAddUpdate()">Add/Update Game Data</a></li>
+                                <li><a href="#" onclick="loadDelete()">Delete Game Data</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#">Xbox Market Place</a>
+                            <ul>
+                                <li><a href="#" onclick="loadView()">View Games</a></li>
+                                <li><a href="#" onclick="loadAddUpdate()">Add/Update Game Data</a></li>
+                                <li><a href="#" onclick="loadDelete()">Delete Game Data</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+        <div id="content">
+            <!-- Dynamic content will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        function loadHome() {
+            const contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = `
+                <form id="loginForm">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+
+                    <button type="button" onclick="login()">Login</button>
+                </form>
+            `;
+        }
+
+        function loadReporting() {
+            const contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = `
+                <iframe title="XboxDashboard" width="100%" height="100%" src="https://app.fabric.microsoft.com/view?r=eyJrIjoiMjBiYWMxMmQtOGYxYS00NTE4LWJkZjktN2I0MWEwZjM1NjdkIiwidCI6ImY1ZjAyNzY3LTUwOGUtNGI3OC1iYzA1LTJiMTZjOGEwODFhMSIsImMiOjZ9" frameborder="0" allowFullScreen="true"></iframe>
+            `;
+        }
+
+        function loadView() {
+            const contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = `
+                <h2>View Games</h2>
+                <form id="queryForm">
+                    <label for="titleName">Title Name:</label>
+                    <input type="text" id="titleName" name="titleName" required>
+
+                    <label for="productId">Product ID:</label>
+                    <input type="text" id="productId" name="productId" required>
+
+                    <button type="button" onclick="submitQuery()">Get Metadata</button>
+                </form>
+                <div id="results">
+                    <!-- Results will be displayed here -->
+                </div>
+            `;
+        }
+
+        function loadAddUpdate() {
+            const contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = `
+                <h2>Add/Update Game Data</h2>
+                <form id="addUpdateForm">
+                    <label for="title">Title:</label>
+                    <input type="text" id="title" name="title" required>
+
+                    <label for="releaseDate">Release Date:</label>
+                    <input type="date" id="releaseDate" name="releaseDate" required>
+
+                    <label for="avgRating">Avg Rating:</label>
+                    <input type="number" id="avg_Rating" name="avg_Rating" step="0.1" required>
+
+                    <label for="availableOn">Available On:</label>
+                    <input type="text" id="available_On" name="available_On" required>
+
+                    <label for="categories">Categories:</label>
+                    <input type="text" id="categories" name="categories" required>
+
+                    <label for="descriptions">Descriptions:</label>
+                    <input type="text" id="descriptions" name="descriptions" required>
+
+                    <label for="publisherName">Publisher Name:</label>
+                    <input type="text" id="publisher_Name" name="publisher_Name" required>
+
+                    <label for="includedWith">Included With:</label>
+                    <input type="text" id="included_With" name="included_With">
+
+                    <label for="addons">Addons:</label>
+                    <input type="text" id="addons" name="addons">
+
+                    <label for="contentRating">Content Rating:</label>
+                    <input type="text" id="content_Rating" name="content_Rating" required>
+
+                    <label for="isActive">Is Active:</label>
+                    <input type="checkbox" id="isActive" name="isActive">
+
+                    <label for="productId">Product ID:</label>
+                    <input type="text" id="productId" name="productId" required>
+
+                    <button type="button" onclick="submitAddUpdate()">Add/Update Record</button>
+                </form>
+            `;
+        }
+
+        function loadDelete() {
+            const contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = `
+                <h2>Delete Game Data</h2>
+                <form id="deleteForm">
+                    <label for="productId">Product ID:</label>
+                    <input type="text" id="productId" name="productId" required>
+
+                    <button type="button" onclick="submitDelete()">Delete Record</button>
+                </form>
+                <div id="results">
+                    <!-- Deleted record details will be displayed here -->
+                </div>
+            `;
+        }
+
+        function loadProductCatalog() {
+            const contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = `
+                <h2>Product Catalog</h2>
+                <form id="filtersForm" class="filters-form">
+                    <label for="ratingFilter">Rating:</label>
+                    <select id="ratingFilter" name="ratingFilter">
+                        <option value="">Select</option>
+                        <option value="3_and_above">3 Star & Above</option>
+                        <option value="below_3">0 to 3 Star</option>
+                    </select>
+
+                    <label for="genreFilter">Genre:</label>
+                    <input type="checkbox" id="actionGenre" name="genreFilter" value="Action & adventure">Action & adventure
+                    <input type="checkbox" id="shooterGenre" name="genreFilter" value="Shooter">Shooter
+                    <input type="checkbox" id="rpgGenre" name="genreFilter" value="Role playing">Role playing
+
+                    <label for="platformFilter">Available On:</label>
+                    <select id="platformFilter" name="platformFilter">
+                        <option value="">Select</option>
+                        <option value="XboxOne">XboxOne</option>
+                        <option value="XboxSeriesX">XboxSeriesX</option>
+                        <option value="PC">PC</option>
+                    </select>
+
+                    <label for="sortBy">Sort By:</label>
+                    <select id="sortBy" name="sortBy">
+                        <option value="avg_rating">Rating</option>
+                        <option value="title">Title</option>
+                        <option value="releaseDate">Release Date</option>
+                    </select>
+
+                    <button type="button" onclick="applyFilters()">Apply Filters</button>
+                </form>
+                <div id="results">
+                    <!-- Filtered results will be displayed here -->
+                </div>
+            `;
+
+            // Automatically fetch and display all data
+            fetch('/get-product-catalog')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.result && data.result.length > 0) {
+                        const table = generateTable(data.columns, data.result);
+                        document.getElementById('results').innerHTML = table;
+                    } else {
+                        document.getElementById('results').innerHTML = 'No data found.';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('results').innerHTML = 'Failed to fetch product catalog.';
+                });
+        }
+
+        function submitQuery() {
+            const form = document.getElementById('queryForm');
+            fetch('/get-metadata', {
+                method: 'POST',
+                body: new FormData(form)
+            })
+            .then(response => response.json())
+            .then(data => {
+                const dataArray = data.result.data_array;
+                if (dataArray && dataArray.length > 0) {
+                    const table = generateTable(data.manifest.schema.columns, dataArray);
+                    document.getElementById('results').innerHTML = table;
+                } else {
+                    document.getElementById('results').innerHTML = 'No data found.';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('results').innerHTML = 'Failed to fetch data.';
+            });
+        }
+
+        function submitAddUpdate() {
+            const form = document.getElementById('addUpdateForm');
+            const formData = new FormData(form);
+            const jsonData = {};
+            formData.forEach((value, key) => {
+                jsonData[key] = value;
+            });
+            jsonData['isActive'] = document.getElementById('isActive').checked; // Handle checkbox separately
+
+            fetch('/add-record', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(jsonData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                } else {
+                    alert(`Error: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to add/update record.');
+            });
+        }
+
+        function submitDelete() {
+            const form = document.getElementById('deleteForm');
+            const formData = new FormData(form);
+            const jsonData = {};
+            formData.forEach((value, key) => {
+                jsonData[key] = value;
+            });
+
+            fetch('/delete-record', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(jsonData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    document.getElementById('results').innerHTML = `
+                        <h3>Deleted Record:</h3>
+                        <pre>${JSON.stringify(data.deleted_record, null, 2)}</pre>
+                    `;
+                } else {
+                    alert(`Error: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to delete record.');
+            });
+        }
+
+        function applyFilters() {
+            const rating = document.getElementById('ratingFilter').value;
+            const genres = Array.from(document.querySelectorAll('input[name="genreFilter"]:checked')).map(el => el.value);
+            const platform = document.getElementById('platformFilter').value;
+            const sortBy = document.getElementById('sortBy').value;
+
+            const filters = {
+                rating: rating,
+                genres: genres,
+                platform: platform,
+                sortBy: sortBy
+            };
+
+            fetch('/apply-filters', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(filters)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.result && data.result.length > 0) {
+                    const table = generateTable(data.columns, data.result);
+                    document.getElementById('results').innerHTML = table;
+                } else {
+                    document.getElementById('results').innerHTML = 'No data found.';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('results').innerHTML = 'Failed to apply filters.';
+            });
+        }
+
+        function generateTable(columns, data) {
+            let table = '<table><thead><tr>';
+            columns.forEach(column => {
+                table += `<th>${column.name}</th>`;
+            });
+            table += '</tr></thead><tbody>';
+            data.forEach(row => {
+                table += '<tr>';
+                row.forEach(cell => {
+                    table += `<td>${cell}</td>`;
+                });
+                table += '</tr>';
+            });
+            table += '</tbody></table>';
+            return table;
+        }
+
+        // Load the initial home content
+        document.addEventListener('DOMContentLoaded', loadHome);
+    </script>
+</body>
+</html>
